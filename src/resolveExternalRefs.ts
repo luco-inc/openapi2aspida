@@ -50,7 +50,7 @@ const fetchExternalDocs = async (docs: DocType, inputDir: string) => {
         docList[fetchingUrls.indexOf(url)] = { url, doc };
 
         await fetchDocs(doc, filePath);
-      })
+      }),
     );
 
   await fetchDocs(docs, inputDir);
@@ -96,7 +96,10 @@ const resolveExternalDocs = async (docs: OpenAPIV3_1.Document, inputDir: string)
   };
 };
 
-export default async (docs: OpenAPIV3_1.Document, inputDir: string): Promise<OpenAPIV3_1.Document> => {
+export default async (
+  docs: OpenAPIV3_1.Document,
+  inputDir: string,
+): Promise<OpenAPIV3_1.Document> => {
   const { externalDocs, components } = await resolveExternalDocs(docs, inputDir);
 
   let docsString = JSON.stringify(docs);

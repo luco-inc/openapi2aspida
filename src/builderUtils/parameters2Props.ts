@@ -11,7 +11,10 @@ import { resolveParamsRef } from './resolvers';
 
 export type Parameter = { name: string; prop: string | Prop };
 
-export default (params: OpenAPIV3_1.ComponentsObject['parameters'], openapi: OpenAPIV3_1.Document) =>
+export default (
+  params: OpenAPIV3_1.ComponentsObject['parameters'],
+  openapi: OpenAPIV3_1.Document,
+) =>
   params &&
   Object.keys(params)
     .filter(defKey => {

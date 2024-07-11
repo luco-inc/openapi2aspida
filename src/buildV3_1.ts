@@ -20,7 +20,7 @@ const methodNames = ['get', 'post', 'put', 'delete', 'head', 'options', 'patch']
 
 const getParamsList = (
   openapi: OpenAPIV3_1.Document,
-  params?: (OpenAPIV3_1.ReferenceObject | OpenAPIV3_1.ParameterObject)[]
+  params?: (OpenAPIV3_1.ReferenceObject | OpenAPIV3_1.ParameterObject)[],
 ) => params?.map(p => (isRefObject(p) ? resolveParamsRef(openapi, p.$ref) : p)) || [];
 
 export default (openapi: OpenAPIV3_1.Document) => {
@@ -36,7 +36,7 @@ export default (openapi: OpenAPIV3_1.Document) => {
         .map(path => {
           const methodProps = Object.keys(openapi.paths![path]!).filter(
             (method): method is (typeof methodNames)[number] =>
-              methodNames.includes(method as (typeof methodNames)[number])
+              methodNames.includes(method as (typeof methodNames)[number]),
           );
 
           const file = [
@@ -54,11 +54,11 @@ export default (openapi: OpenAPIV3_1.Document) => {
                         ...prev,
                         ...getParamsList(openapi, openapi.paths![path]![c]?.parameters),
                       ],
-                      [] as OpenAPIV3_1.ParameterObject[]
+                      [] as OpenAPIV3_1.ParameterObject[],
                     ),
                   ],
-                  openapi
-                )
+                  openapi,
+                ),
               ),
             'index',
           ];
@@ -124,7 +124,7 @@ export default (openapi: OpenAPIV3_1.Document) => {
                           break;
                       }
                     }
-                  }
+                  },
                 );
 
                 if (reqHeaders.length || reqRefHeaders.length) {
@@ -136,14 +136,14 @@ export default (openapi: OpenAPIV3_1.Document) => {
                       ...reqRefHeaders,
                       ...(reqHeaders.length
                         ? [
-                          {
-                            isArray: false,
-                            isEnum: false,
-                            nullable: false,
-                            description: null,
-                            value: reqHeaders,
-                          },
-                        ]
+                            {
+                              isArray: false,
+                              isEnum: false,
+                              nullable: false,
+                              description: null,
+                              value: reqHeaders,
+                            },
+                          ]
                         : []),
                     ],
                   });
@@ -158,14 +158,14 @@ export default (openapi: OpenAPIV3_1.Document) => {
                       ...refQuery,
                       ...(query.length
                         ? [
-                          {
-                            isArray: false,
-                            isEnum: false,
-                            nullable: false,
-                            description: null,
-                            value: query,
-                          },
-                        ]
+                            {
+                              isArray: false,
+                              isEnum: false,
+                              nullable: false,
+                              description: null,
+                              value: query,
+                            },
+                          ]
                         : []),
                     ],
                   });
@@ -173,7 +173,9 @@ export default (openapi: OpenAPIV3_1.Document) => {
               }
 
               if (target.responses) {
-                const code = Object.keys(target.responses).find(code => code.match(/^(20\d|30\d)$/));
+                const code = Object.keys(target.responses).find(code =>
+                  code.match(/^(20\d|30\d)$/),
+                );
                 if (code) {
                   params.push({
                     name: 'status',
@@ -195,19 +197,19 @@ export default (openapi: OpenAPIV3_1.Document) => {
                   const content =
                     (ref.content &&
                       Object.entries(ref.content).find(([key]) =>
-                        key.startsWith('application/')
+                        key.startsWith('application/'),
                       )?.[1]) ??
                     ref.content?.[Object.keys(ref.content)[0]];
 
                   if (content?.schema) {
                     const val = schema2value(content.schema, true);
                     val &&
-                    params.push({
-                      name: 'resBody',
-                      required: true,
-                      description: ref.description,
-                      values: [val],
-                    });
+                      params.push({
+                        name: 'resBody',
+                        required: true,
+                        description: ref.description,
+                        values: [val],
+                      });
                   }
 
                   if (ref.headers) {
@@ -226,11 +228,11 @@ export default (openapi: OpenAPIV3_1.Document) => {
                               const headerData = ref.headers![header];
                               const val = isRefObject(headerData)
                                 ? {
-                                  isArray: false,
-                                  isEnum: false,
-                                  description: null,
-                                  value: $ref2Type(headerData.$ref),
-                                }
+                                    isArray: false,
+                                    isEnum: false,
+                                    description: null,
+                                    value: $ref2Type(headerData.$ref),
+                                  }
                                 : schema2value(headerData.schema);
 
                               return (
@@ -283,19 +285,21 @@ export default (openapi: OpenAPIV3_1.Document) => {
 
                   if (target.requestBody.content['multipart/form-data']?.schema) {
                     reqFormat = 'FormData';
-                    reqBody = schema2value(target.requestBody.content['multipart/form-data'].schema);
+                    reqBody = schema2value(
+                      target.requestBody.content['multipart/form-data'].schema,
+                    );
                   } else if (
                     target.requestBody.content['application/x-www-form-urlencoded']?.schema
                   ) {
                     reqFormat = 'URLSearchParams';
                     reqBody = schema2value(
-                      target.requestBody.content['application/x-www-form-urlencoded'].schema
+                      target.requestBody.content['application/x-www-form-urlencoded'].schema,
                     );
                   } else {
                     const content =
                       target.requestBody.content &&
                       Object.entries(target.requestBody.content).find(([key]) =>
-                        key.startsWith('application/')
+                        key.startsWith('application/'),
                       )?.[1];
 
                     if (content?.schema) reqBody = schema2value(content.schema);
@@ -365,7 +369,7 @@ export default (openapi: OpenAPIV3_1.Document) => {
             return { file, methods: '' };
           }
         })
-        .filter(file => file.methods)
+        .filter(file => file.methods),
     );
   }
 

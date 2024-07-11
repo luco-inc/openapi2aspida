@@ -16,7 +16,7 @@ export const $ref2Type = (ref: string) => {
   const { typeName, propName } = $ref2TypeName(ref);
   return `Types.${defKey2defName(typeName)}${propName ? `['${propName}']` : ''}`.replace(
     /Array$/,
-    '[]'
+    '[]',
   );
 };
 
@@ -27,14 +27,14 @@ export const isRefObject = (
     | OpenAPIV3_1.RequestBodyObject
     | OpenAPIV3_1.HeaderObject
     | OpenAPIV3_1.ParameterObject
-    | OpenAPIV3_1.SchemaObject
+    | OpenAPIV3_1.SchemaObject,
 ): params is OpenAPIV3_1.ReferenceObject => '$ref' in params;
 
 const isArraySchema = (schema: OpenAPIV3_1.SchemaObject): schema is OpenAPIV3_1.ArraySchemaObject =>
   schema.type === 'array';
 
 export const isObjectSchema = (
-  schema: OpenAPIV3_1.ReferenceObject | OpenAPIV3_1.SchemaObject
+  schema: OpenAPIV3_1.ReferenceObject | OpenAPIV3_1.SchemaObject,
 ): schema is OpenAPIV3_1.NonArraySchemaObject => !isRefObject(schema) && schema.type !== 'array';
 
 export const getPropertyName = (name: string) =>
@@ -47,7 +47,9 @@ const of2Values = (obj: OpenAPIV3_1.SchemaObject): PropValue[] | null => {
   return values.length ? values : null;
 };
 
-const object2value = (obj: Exclude<OpenAPIV3_1.SchemaObject, OpenAPIV3_1.ArraySchemaObject>): Prop[] => {
+const object2value = (
+  obj: Exclude<OpenAPIV3_1.SchemaObject, OpenAPIV3_1.ArraySchemaObject>,
+): Prop[] => {
   const properties = obj.properties ?? {};
 
   const value = Object.keys(properties)
@@ -97,7 +99,7 @@ export const BINARY_TYPE = '(File | ReadStream)';
 
 export const schema2value = (
   schema: OpenAPIV3_1.ReferenceObject | OpenAPIV3_1.SchemaObject | undefined,
-  isResponse?: true
+  isResponse?: true,
 ): PropValue | null => {
   if (!schema) return null;
 
@@ -118,7 +120,7 @@ export const schema2value = (
       hasOf = schema.oneOf ? 'oneOf' : schema.allOf ? 'allOf' : 'anyOf';
       value = of2Values(schema);
     } else if (schema.const) {
-      console.warn("CAUTION pre implement const")
+      console.warn('CAUTION pre implement const');
       isEnum = true;
       value = schema.type === 'string' ? `'${schema.const}'` : schema.const;
     } else if (schema.enum) {
@@ -132,11 +134,11 @@ export const schema2value = (
     } else if (schema.format === 'binary') {
       value = isResponse ? 'Blob' : BINARY_TYPE;
     } else if (Array.isArray(schema.type)) {
-      const hasNullish = schema.type.find(t => t === 'null')
+      const hasNullish = schema.type.find(t => t === 'null');
       if (hasNullish) {
-        nullable = true
+        nullable = true;
       }
-      const nonNullValue = schema.type.find(t => t !== 'null')
+      const nonNullValue = schema.type.find(t => t !== 'null');
       if (nonNullValue) {
         const propVal = {
           integer: 'number',
@@ -144,15 +146,15 @@ export const schema2value = (
           string: 'string',
           boolean: 'boolean',
           object: null,
-          array: null
-        }[nonNullValue]
+          array: null,
+        }[nonNullValue];
         if (propVal) {
-          throw new Error("not implement object/array")
+          throw new Error('not implement object/array');
         }
-      }else {
-        throw new Error("only has null")
+      } else {
+        throw new Error('only has null');
       }
-    } else if (schema.type !== 'object' ) {
+    } else if (schema.type !== 'object') {
       value = schema.type
         ? {
             integer: 'number',

@@ -2,7 +2,11 @@ import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import { getPropertyName, isRefObject } from './converters';
 import { resolveSchemasRef } from './resolvers';
 
-export default (text: string, params: OpenAPIV3.ParameterObject[], openapi: OpenAPIV3_1.Document) => {
+export default (
+  text: string,
+  params: OpenAPIV3.ParameterObject[],
+  openapi: OpenAPIV3_1.Document,
+) => {
   if (text === '*') return '_any';
   if (!/^{/.test(text)) return text;
 
