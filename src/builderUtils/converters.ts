@@ -109,23 +109,39 @@ export const schema2value = (
   let hasOf: PropValue['hasOf'];
   let value: PropValue['value'] | null = null;
   let description: PropValue['description'] = null;
-
   if (isRefObject(schema)) {
     value = $ref2Type(schema.$ref);
   } else {
-    //nullable = !!schema.nullable;
+    // nullable = !!schema.nullable;
     description = schema.description ?? null;
-
+    let schemeType;
+    if (Array.isArray(schema.type)) {
+      const hasNullish = schema.type.find(t => t === 'null');
+      if (hasNullish) {
+        nullable = true;
+      }
+      const nonNullValue = schema.type.filter(t => t !== 'null');
+      if (nonNullValue && nonNullValue.length >= 1) {
+        schemeType = nonNullValue[0];
+        if (nonNullValue.length > 1) {
+          console.warn('CAUTION no implement nonNull multiple type');
+        }
+      } else {
+        throw new Error('only has null');
+      }
+    } else {
+      schemeType = schema.type;
+    }
     if (schema.oneOf || schema.allOf || schema.anyOf) {
       hasOf = schema.oneOf ? 'oneOf' : schema.allOf ? 'allOf' : 'anyOf';
       value = of2Values(schema);
     } else if (schema.const) {
       console.warn('CAUTION pre implement const');
       isEnum = true;
-      value = schema.type === 'string' ? `'${schema.const}'` : schema.const;
+      value = schemeType === 'string' ? `'${schema.const}'` : schema.const;
     } else if (schema.enum) {
       isEnum = true;
-      value = schema.type === 'string' ? schema.enum.map(e => `'${e}'`) : schema.enum;
+      value = schemeType === 'string' ? schema.enum.map(e => `'${e}'`) : schema.enum;
     } else if (isArraySchema(schema)) {
       isArray = true;
       value = schema2value(schema.items);
@@ -133,37 +149,27 @@ export const schema2value = (
       value = object2value(schema);
     } else if (schema.format === 'binary') {
       value = isResponse ? 'Blob' : BINARY_TYPE;
-    } else if (Array.isArray(schema.type)) {
-      const hasNullish = schema.type.find(t => t === 'null');
-      if (hasNullish) {
-        nullable = true;
-      }
-      const nonNullValue = schema.type.find(t => t !== 'null');
-      if (nonNullValue) {
-        const propVal = {
-          integer: 'number',
-          number: 'number',
-          string: 'string',
-          boolean: 'boolean',
-          object: null,
-          array: null,
-        }[nonNullValue];
-        if (propVal) {
-          throw new Error('not implement object/array');
-        }
-      } else {
-        throw new Error('only has null');
-      }
-    } else if (schema.type !== 'object') {
-      value = schema.type
+    } else if (schemeType !== 'object' && schemeType !== 'array') {
+      value = schemeType
         ? {
             integer: 'number',
             number: 'number',
             null: 'null',
             string: 'string',
             boolean: 'boolean',
-          }[schema.type]
+          }[schemeType]
         : null;
+    } else if (schemeType === 'object') {
+      /**
+       * propertiesの存在しないすべてのobject typeは空のObject (実体: {})と扱う
+       */
+      value = [];
+    } else if (schemeType === 'array') {
+      isArray = true;
+      value = [];
+      console.warn('CAUTION no implement schemaType array' + JSON.stringify(schema));
+    } else {
+      throw new Error("You shouldn't see this message. Please report this issue with schemajson.");
     }
   }
 
