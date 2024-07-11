@@ -117,6 +117,10 @@ export const schema2value = (
     if (schema.oneOf || schema.allOf || schema.anyOf) {
       hasOf = schema.oneOf ? 'oneOf' : schema.allOf ? 'allOf' : 'anyOf';
       value = of2Values(schema);
+    } else if (schema.const) {
+      console.warn("CAUTION pre implement const")
+      isEnum = true;
+      value = schema.type === 'string' ? `'${schema.const}'` : schema.const;
     } else if (schema.enum) {
       isEnum = true;
       value = schema.type === 'string' ? schema.enum.map(e => `'${e}'`) : schema.enum;
@@ -128,7 +132,26 @@ export const schema2value = (
     } else if (schema.format === 'binary') {
       value = isResponse ? 'Blob' : BINARY_TYPE;
     } else if (Array.isArray(schema.type)) {
-      //TODO: Imprement this
+      const hasNullish = schema.type.find(t => t === 'null')
+      if (hasNullish) {
+        nullable = true
+      }
+      const nonNullValue = schema.type.find(t => t !== 'null')
+      if (nonNullValue) {
+        const propVal = {
+          integer: 'number',
+          number: 'number',
+          string: 'string',
+          boolean: 'boolean',
+          object: null,
+          array: null
+        }[nonNullValue]
+        if (propVal) {
+          throw new Error("not implement object/array")
+        }
+      }else {
+        throw new Error("only has null")
+      }
     } else if (schema.type !== 'object' ) {
       value = schema.type
         ? {
