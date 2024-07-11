@@ -1,4 +1,4 @@
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import {
   $ref2Type,
   defKey2defName,
@@ -11,7 +11,7 @@ import { resolveParamsRef } from './resolvers';
 
 export type Parameter = { name: string; prop: string | Prop };
 
-export default (params: OpenAPIV3.ComponentsObject['parameters'], openapi: OpenAPIV3.Document) =>
+export default (params: OpenAPIV3_1.ComponentsObject['parameters'], openapi: OpenAPIV3_1.Document) =>
   params &&
   Object.keys(params)
     .filter(defKey => {

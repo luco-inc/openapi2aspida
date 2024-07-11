@@ -2,7 +2,7 @@ import fs from 'fs';
 import http from 'http';
 import https from 'https';
 import yaml from 'js-yaml';
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import path from 'path';
 
 const getText = (url: string) =>
@@ -68,7 +68,7 @@ const getComponentInfo = (docList: DocInfo[], url: string, prop: string) => {
 const genExternalTypeName = (docList: DocInfo[], url: string, prop: string) =>
   `External${docList.findIndex(d => d.url === url)}${prop ? `_${prop.split('/').pop()}` : ''}`;
 
-const resolveExternalDocs = async (docs: OpenAPIV3.Document, inputDir: string) => {
+const resolveExternalDocs = async (docs: OpenAPIV3_1.Document, inputDir: string) => {
   const externalDocs = await fetchExternalDocs(docs, inputDir);
   const componentsInfoList: { url: string; prop: string; name: string }[] = [];
   const replacedExternalDocs = externalDocs.map((selfDoc: DocInfo) => {
@@ -96,7 +96,7 @@ const resolveExternalDocs = async (docs: OpenAPIV3.Document, inputDir: string) =
   };
 };
 
-export default async (docs: OpenAPIV3.Document, inputDir: string): Promise<OpenAPIV3.Document> => {
+export default async (docs: OpenAPIV3_1.Document, inputDir: string): Promise<OpenAPIV3_1.Document> => {
   const { externalDocs, components } = await resolveExternalDocs(docs, inputDir);
 
   let docsString = JSON.stringify(docs);
@@ -111,9 +111,9 @@ export default async (docs: OpenAPIV3.Document, inputDir: string): Promise<OpenA
     Object.assign(components[info.type], { [name]: info.data });
     docsString = docsString.replace(targetText, `#/components/${info.type}/${name}`);
   });
-  const resolved: OpenAPIV3.Document = JSON.parse(docsString);
+  const resolved: OpenAPIV3_1.Document = JSON.parse(docsString);
   resolved.components = resolved.components || {};
-  (Object.keys(components) as (keyof OpenAPIV3.ComponentsObject)[]).forEach(key => {
+  (Object.keys(components) as (keyof OpenAPIV3_1.ComponentsObject)[]).forEach(key => {
     resolved.components![key] = {
       ...resolved.components![key],
       ...components[key],

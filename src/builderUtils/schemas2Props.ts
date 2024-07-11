@@ -1,11 +1,11 @@
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import { defKey2defName, isRefObject, schema2value } from './converters';
 import type { PropValue } from './props2String';
 import { resolveSchemasRef } from './resolvers';
 
 export type Schema = { name: string; value: PropValue };
 
-export default (schemas: OpenAPIV3.ComponentsObject['schemas'], openapi: OpenAPIV3.Document) =>
+export default (schemas: OpenAPIV3_1.ComponentsObject['schemas'], openapi: OpenAPIV3_1.Document) =>
   schemas &&
   Object.keys(schemas)
     .filter(defKey => {

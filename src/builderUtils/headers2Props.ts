@@ -1,10 +1,10 @@
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import { $ref2Type, defKey2defName, isRefObject, schema2value } from './converters';
 import type { PropValue } from './props2String';
 
 export type Header = { name: string; value: string | PropValue };
 
-export default (headers: OpenAPIV3.ComponentsObject['headers']) =>
+export default (headers: OpenAPIV3_1.ComponentsObject['headers']) =>
   headers &&
   Object.keys(headers)
     .map(defKey => {

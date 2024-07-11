@@ -1,4 +1,4 @@
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import type { Prop, PropValue } from './props2String';
 
 export const defKey2defName = (key: string) =>
@@ -22,32 +22,32 @@ export const $ref2Type = (ref: string) => {
 
 export const isRefObject = (
   params:
-    | OpenAPIV3.ReferenceObject
-    | OpenAPIV3.ResponseObject
-    | OpenAPIV3.RequestBodyObject
-    | OpenAPIV3.HeaderObject
-    | OpenAPIV3.ParameterObject
-    | OpenAPIV3.SchemaObject
-): params is OpenAPIV3.ReferenceObject => '$ref' in params;
+    | OpenAPIV3_1.ReferenceObject
+    | OpenAPIV3_1.ResponseObject
+    | OpenAPIV3_1.RequestBodyObject
+    | OpenAPIV3_1.HeaderObject
+    | OpenAPIV3_1.ParameterObject
+    | OpenAPIV3_1.SchemaObject
+): params is OpenAPIV3_1.ReferenceObject => '$ref' in params;
 
-const isArraySchema = (schema: OpenAPIV3.SchemaObject): schema is OpenAPIV3.ArraySchemaObject =>
+const isArraySchema = (schema: OpenAPIV3_1.SchemaObject): schema is OpenAPIV3_1.ArraySchemaObject =>
   schema.type === 'array';
 
 export const isObjectSchema = (
-  schema: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject
-): schema is OpenAPIV3.NonArraySchemaObject => !isRefObject(schema) && schema.type !== 'array';
+  schema: OpenAPIV3_1.ReferenceObject | OpenAPIV3_1.SchemaObject
+): schema is OpenAPIV3_1.NonArraySchemaObject => !isRefObject(schema) && schema.type !== 'array';
 
 export const getPropertyName = (name: string) =>
   /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(name) ? name : `'${name}'`;
 
-const of2Values = (obj: OpenAPIV3.SchemaObject): PropValue[] | null => {
+const of2Values = (obj: OpenAPIV3_1.SchemaObject): PropValue[] | null => {
   const values = (obj.oneOf || obj.allOf || obj.anyOf || [])
     .map(p => schema2value(p))
     .filter(Boolean) as PropValue[];
   return values.length ? values : null;
 };
 
-const object2value = (obj: OpenAPIV3.NonArraySchemaObject): Prop[] => {
+const object2value = (obj: Exclude<OpenAPIV3_1.SchemaObject, OpenAPIV3_1.ArraySchemaObject>): Prop[] => {
   const properties = obj.properties ?? {};
 
   const value = Object.keys(properties)
@@ -96,7 +96,7 @@ const object2value = (obj: OpenAPIV3.NonArraySchemaObject): Prop[] => {
 export const BINARY_TYPE = '(File | ReadStream)';
 
 export const schema2value = (
-  schema: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject | undefined,
+  schema: OpenAPIV3_1.ReferenceObject | OpenAPIV3_1.SchemaObject | undefined,
   isResponse?: true
 ): PropValue | null => {
   if (!schema) return null;
@@ -111,7 +111,7 @@ export const schema2value = (
   if (isRefObject(schema)) {
     value = $ref2Type(schema.$ref);
   } else {
-    nullable = !!schema.nullable;
+    //nullable = !!schema.nullable;
     description = schema.description ?? null;
 
     if (schema.oneOf || schema.allOf || schema.anyOf) {
@@ -127,7 +127,9 @@ export const schema2value = (
       value = object2value(schema);
     } else if (schema.format === 'binary') {
       value = isResponse ? 'Blob' : BINARY_TYPE;
-    } else if (schema.type !== 'object') {
+    } else if (Array.isArray(schema.type)) {
+      //TODO: Imprement this
+    } else if (schema.type !== 'object' ) {
       value = schema.type
         ? {
             integer: 'number',
