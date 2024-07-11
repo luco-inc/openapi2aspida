@@ -1,28 +1,28 @@
 {
-  "name": "openapi2aspida",
+  "name": "@luco-inc/openapi2aspida",
   "version": "0.0.0",
-  "description": "Convert OpenAPI 3.0 or Swagger 2.0 definitions into aspida",
+  "description": "Convert OpenAPI 3.1 definitions into aspida",
   "author": "Solufa <solufa2020@gmail.com>",
   "license": "MIT",
   "main": "dist/index.js",
   "bin": "bin/index.js",
   "scripts": {
-    "dev": "npm run build && node samples/rimraf.js && node bin/index.js",
-    "build": "npm run rimraf && tsc",
-    "rimraf": "node -e \"require('fs').existsSync('dist') && require('fs').rmdirSync('dist', { recursive: true })\"",
+    "dev": "pnpm run build && node samples/rimraf.js && node bin/index.js",
+    "build": "pnpm run rimraf && tsc",
+    "rimraf": "node -e 'fs.rmSync(`dist`, {recursive:true, force:true})'",
     "lint": "eslint --ext .ts . && prettier --check \"./**/*.ts\"",
     "lint:fix": "eslint --ext .ts . --fix && prettier --write \"./**/*.ts\"",
     "test": "jest",
     "typecheck": "tsc --noEmit",
-    "prepare": "mkdir -p dist && npm run build"
+    "prepare": "mkdir -p dist && pnpm run build"
   },
-  "homepage": "https://github.com/aspida/openapi2aspida#readme",
+  "homepage": "https://github.com/luco-inc/openapi2aspida#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aspida/openapi2aspida.git"
+    "url": "git+https://github.com/luco-inc/openapi2aspida.git"
   },
   "bugs": {
-    "url": "https://github.com/aspida/openapi2aspida/issues"
+    "url": "https://github.com/luco-inc/openapi2aspida/issues"
   },
   "files": [
     "dist",
@@ -34,79 +34,35 @@
     "openapi",
     "swagger"
   ],
-  "eslintConfig": {
-    "env": {
-      "es6": true,
-      "node": true,
-      "browser": true
-    },
-    "extends": [
-      "standard",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:jest/recommended",
-      "prettier"
-    ],
-    "parserOptions": {
-      "ecmaVersion": 2018,
-      "sourceType": "module"
-    },
-    "root": true,
-    "rules": {
-      "@typescript-eslint/consistent-type-imports": "error",
-      "@typescript-eslint/no-non-null-assertion": "off",
-      "@typescript-eslint/explicit-function-return-type": "off",
-      "@typescript-eslint/ban-ts-comment": "off",
-      "@typescript-eslint/explicit-module-boundary-types": "off",
-      "@typescript-eslint/no-var-requires": "off",
-      "@typescript-eslint/ban-types": "off",
-      "@typescript-eslint/camelcase": "off",
-      "@typescript-eslint/no-explicit-any": "off"
-    }
-  },
-  "prettier": {
-    "printWidth": 100,
-    "arrowParens": "avoid",
-    "singleQuote": true,
-    "overrides": [
-      {
-        "files": [
-          "*.md",
-          "*.yml"
-        ],
-        "options": {
-          "singleQuote": false
-        }
-      }
-    ]
-  },
   "dependencies": {
-    "@apidevtools/swagger-parser": "^10.1.0",
-    "aspida": "^1.13.3",
-    "js-yaml": "^4.1.0",
-    "openapi-types": "^12.1.3",
-    "swagger2openapi": "^7.0.8"
+    "@apidevtools/swagger-parser": "10.1.0",
+    "aspida": "1.14.0",
+    "js-yaml": "4.1.0",
+    "openapi-types": "12.1.3",
+    "swagger2openapi": "7.0.8"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.3",
-    "@types/js-yaml": "^4.0.5",
-    "@types/minimist": "^1.2.2",
-    "@typescript-eslint/eslint-plugin": "^6.2.1",
-    "@typescript-eslint/parser": "^6.2.1",
-    "eslint": "^8.46.0",
-    "eslint-config-prettier": "^8.10.0",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.28.0",
-    "eslint-plugin-jest": "^27.2.3",
-    "eslint-plugin-n": "^16.0.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-standard": "^5.0.0",
-    "jest": "^29.6.2",
-    "minimist": "^1.2.8",
-    "prettier": "^2.8.8",
-    "prettier-plugin-organize-imports": "^3.2.3",
-    "ts-jest": "^29.1.1",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.1.6"
-  }
+    "@types/jest": "29.5.12",
+    "@types/js-yaml": "4.0.9",
+    "@types/minimist": "1.2.5",
+    "@typescript-eslint/eslint-plugin": "7.16.0",
+    "@typescript-eslint/parser": "7.16.0",
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-config-standard": "17.1.0",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-jest": "28.6.0",
+    "eslint-plugin-n": "16.6.2",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-promise": "6.4.0",
+    "eslint-plugin-standard": "5.0.0",
+    "jest": "29.7.0",
+    "minimist": "1.2.8",
+    "prettier": "3.3.2",
+    "prettier-plugin-organize-imports": "4.0.0",
+    "ts-jest": "29.2.2",
+    "ts-node": "10.9.2",
+    "typescript": "5.5.3"
+  },
+  "packageManager": "pnpm@9.5.0+sha512.140036830124618d624a2187b50d04289d5a087f326c9edfc0ccd733d76c4f52c3a313d4fc148794a2a9d81553016004e6742e8cf850670268a7387fc220c903"
 }

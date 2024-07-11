@@ -1,8 +1,12 @@
-import type { OpenAPIV3 } from 'openapi-types';
+import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import { getPropertyName, isRefObject } from './converters';
 import { resolveSchemasRef } from './resolvers';
 
-export default (text: string, params: OpenAPIV3.ParameterObject[], openapi: OpenAPIV3.Document) => {
+export default (
+  text: string,
+  params: OpenAPIV3.ParameterObject[],
+  openapi: OpenAPIV3_1.Document,
+) => {
   if (text === '*') return '_any';
   if (!/^{/.test(text)) return text;
 
@@ -13,7 +17,7 @@ export default (text: string, params: OpenAPIV3.ParameterObject[], openapi: Open
 
   if (!schema) return prefix;
 
-  if (isRefObject(schema)) {
+  if ('$ref' in schema) {
     const referencedSchema = resolveSchemasRef(openapi, schema.$ref);
 
     if (referencedSchema.type === 'string') {
@@ -23,13 +27,13 @@ export default (text: string, params: OpenAPIV3.ParameterObject[], openapi: Open
     } else {
       return prefix;
     }
+  } else {
+    return `${prefix}${
+      schema.type === 'string'
+        ? '@string'
+        : schema.type === 'number' || schema.type === 'integer'
+          ? '@number'
+          : ''
+    }`;
   }
-
-  return `${prefix}${
-    schema.type === 'string'
-      ? '@string'
-      : schema.type === 'number' || schema.type === 'integer'
-      ? '@number'
-      : ''
-  }`;
 };
