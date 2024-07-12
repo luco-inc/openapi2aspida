@@ -16,7 +16,7 @@ export const $ref2Type = (ref: string) => {
   const { typeName, propName } = $ref2TypeName(ref);
   return `Types.${defKey2defName(typeName)}${propName ? `['${propName}']` : ''}`.replace(
     /Array$/,
-    '[]',
+    '[]'
   );
 };
 
@@ -27,14 +27,14 @@ export const isRefObject = (
     | OpenAPIV3_1.RequestBodyObject
     | OpenAPIV3_1.HeaderObject
     | OpenAPIV3_1.ParameterObject
-    | OpenAPIV3_1.SchemaObject,
+    | OpenAPIV3_1.SchemaObject
 ): params is OpenAPIV3_1.ReferenceObject => '$ref' in params;
 
 const isArraySchema = (schema: OpenAPIV3_1.SchemaObject): schema is OpenAPIV3_1.ArraySchemaObject =>
   schema.type === 'array';
 
 export const isObjectSchema = (
-  schema: OpenAPIV3_1.ReferenceObject | OpenAPIV3_1.SchemaObject,
+  schema: OpenAPIV3_1.ReferenceObject | OpenAPIV3_1.SchemaObject
 ): schema is OpenAPIV3_1.NonArraySchemaObject => !isRefObject(schema) && schema.type !== 'array';
 
 export const getPropertyName = (name: string) =>
@@ -48,7 +48,7 @@ const of2Values = (obj: OpenAPIV3_1.SchemaObject): PropValue[] | null => {
 };
 
 const object2value = (
-  obj: Exclude<OpenAPIV3_1.SchemaObject, OpenAPIV3_1.ArraySchemaObject>,
+  obj: Exclude<OpenAPIV3_1.SchemaObject, OpenAPIV3_1.ArraySchemaObject>
 ): Prop[] => {
   const properties = obj.properties ?? {};
 
@@ -99,7 +99,7 @@ export const BINARY_TYPE = '(File | ReadStream)';
 
 export const schema2value = (
   schema: OpenAPIV3_1.ReferenceObject | OpenAPIV3_1.SchemaObject | undefined,
-  isResponse?: true,
+  isResponse?: true
 ): PropValue | null => {
   if (!schema) return null;
 
@@ -161,9 +161,9 @@ export const schema2value = (
         : null;
     } else if (schemeType === 'object') {
       /**
-       * propertiesの存在しないすべてのobject typeは空のObject (実体: {})と扱う
+       * propertiesの存在しないすべてのobject typeはundefinedと扱うため、nullを返す
        */
-      value = [];
+      value = null;
     } else if (schemeType === 'array') {
       isArray = true;
       value = [];
