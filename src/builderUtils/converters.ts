@@ -16,7 +16,7 @@ export const $ref2Type = (ref: string) => {
   const { typeName, propName } = $ref2TypeName(ref);
   return `Types.${defKey2defName(typeName)}${propName ? `['${propName}']` : ''}`.replace(
     /Array$/,
-    '[]'
+    '[]',
   );
 };
 
@@ -27,14 +27,14 @@ export const isRefObject = (
     | OpenAPIV3_1.RequestBodyObject
     | OpenAPIV3_1.HeaderObject
     | OpenAPIV3_1.ParameterObject
-    | OpenAPIV3_1.SchemaObject
+    | OpenAPIV3_1.SchemaObject,
 ): params is OpenAPIV3_1.ReferenceObject => '$ref' in params;
 
 const isArraySchema = (schema: OpenAPIV3_1.SchemaObject): schema is OpenAPIV3_1.ArraySchemaObject =>
   schema.type === 'array';
 
 export const isObjectSchema = (
-  schema: OpenAPIV3_1.ReferenceObject | OpenAPIV3_1.SchemaObject
+  schema: OpenAPIV3_1.ReferenceObject | OpenAPIV3_1.SchemaObject,
 ): schema is OpenAPIV3_1.NonArraySchemaObject => !isRefObject(schema) && schema.type !== 'array';
 
 export const getPropertyName = (name: string) =>
@@ -48,7 +48,7 @@ const of2Values = (obj: OpenAPIV3_1.SchemaObject): PropValue[] | null => {
 };
 
 const object2value = (
-  obj: Exclude<OpenAPIV3_1.SchemaObject, OpenAPIV3_1.ArraySchemaObject>
+  obj: Exclude<OpenAPIV3_1.SchemaObject, OpenAPIV3_1.ArraySchemaObject>,
 ): Prop[] => {
   const properties = obj.properties ?? {};
 
@@ -99,7 +99,7 @@ export const BINARY_TYPE = '(File | ReadStream)';
 
 export const schema2value = (
   schema: OpenAPIV3_1.ReferenceObject | OpenAPIV3_1.SchemaObject | undefined,
-  isResponse?: true
+  isResponse?: true,
 ): PropValue | null => {
   if (!schema) return null;
 
@@ -114,7 +114,6 @@ export const schema2value = (
   } else {
     // nullable = !!schema.nullable;
     description = schema.description ?? null;
-    let schemeType;
     if (Array.isArray(schema.type)) {
       const hasNullish = schema.type.find(t => t === 'null');
       if (hasNullish) {
@@ -122,15 +121,13 @@ export const schema2value = (
       }
       const nonNullValue = schema.type.filter(t => t !== 'null');
       if (nonNullValue && nonNullValue.length >= 1) {
-        schemeType = nonNullValue[0];
+        schema.type = nonNullValue[0];
         if (nonNullValue.length > 1) {
           console.warn('CAUTION no implement nonNull multiple type');
         }
       } else {
         throw new Error('only has null');
       }
-    } else {
-      schemeType = schema.type;
     }
     if (schema.oneOf || schema.allOf || schema.anyOf) {
       hasOf = schema.oneOf ? 'oneOf' : schema.allOf ? 'allOf' : 'anyOf';
@@ -138,10 +135,10 @@ export const schema2value = (
     } else if (schema.const) {
       console.warn('CAUTION pre implement const');
       isEnum = true;
-      value = schemeType === 'string' ? `'${schema.const}'` : schema.const;
+      value = schema.type === 'string' ? `'${schema.const}'` : schema.const;
     } else if (schema.enum) {
       isEnum = true;
-      value = schemeType === 'string' ? schema.enum.map(e => `'${e}'`) : schema.enum;
+      value = schema.type === 'string' ? schema.enum.map(e => `'${e}'`) : schema.enum;
     } else if (isArraySchema(schema)) {
       isArray = true;
       value = schema2value(schema.items);
@@ -149,25 +146,25 @@ export const schema2value = (
       value = object2value(schema);
     } else if (schema.format === 'binary') {
       value = isResponse ? 'Blob' : BINARY_TYPE;
-    } else if (schemeType !== 'object' && schemeType !== 'array') {
-      value = schemeType
+    } else if (schema.type !== 'object' && !Array.isArray(schema.type)) {
+      value = schema.type
         ? {
             integer: 'number',
             number: 'number',
             null: 'null',
             string: 'string',
             boolean: 'boolean',
-          }[schemeType]
+          }[schema.type]
         : null;
-    } else if (schemeType === 'object') {
+    } else if (schema.type === 'object') {
       /**
        * propertiesの存在しないすべてのobject typeはundefinedと扱うため、nullを返す
        */
       value = null;
-    } else if (schemeType === 'array') {
-      isArray = true;
-      value = [];
-      console.warn('CAUTION no implement schemaType array' + JSON.stringify(schema));
+    } else if (Array.isArray(schema.type)) {
+      throw new Error(
+        "You shouldn't see this message. schema.type is array. Please report this issue with schemajson.",
+      );
     } else {
       throw new Error("You shouldn't see this message. Please report this issue with schemajson.");
     }
